@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # zowe_operations.sh
 
 # Convert username to lowercase

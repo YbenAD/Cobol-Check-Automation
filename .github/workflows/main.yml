@@ -30,11 +30,14 @@ jobs:
           which zowe
           zowe --version
 
-      - name: Test mainframe connection
+      - name: Setup Mainframe Environment and Upload COBOL Check
         env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_OPT_USER: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_OPT_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
           ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_OPT_REJECT_UNAUTHORIZED: false
-        run: zowe zosmf check status
+        run: |
+          chmod +x .github/scripts/zowe_operations.sh
+          .github/scripts/zowe_operations.sh

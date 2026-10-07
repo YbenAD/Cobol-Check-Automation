@@ -50,12 +50,23 @@ jobs:
           ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_OPT_REJECT_UNAUTHORIZED: false
+          SSHPASS: ${{ secrets.ZOWE_PASSWORD }}
           SSH_HOST_KEY: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7VsMDIM4P/r2lLsq0oTYJpUmoKQ6ZtQL5W8a3H/Pnp/4izOQIz7NY7RhmGdzS3UGxdESahom7Y7Zqt+D4rcPJcxfFYm+zPrZzgLExzBJEO39BDRsu0eNMU/dgcHsvVTi0qxuMEHIPUM7bk0KEAgdHzlSs658WyOOZLXn1eUOup7L0z5lT/m6gPK+0BOq5pXoON7Zi7JGppSW6Ff3nBXyipZX/jdjJ0/x0zdvgzq3XsPffksjTgPMwMnx5Aal7Tk8yNbdcSU9T0bg591JWmcJuHsWDKqt0GR3kQ0C8yDm8NUxTDohAcjjZYDUlsRTpG354gitGwS0DnxG7jAL8TWyH"
         run: |
-          USERDIR="/z/$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')"
+          USERID="$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')"
+          USERDIR="/z/$USERID"
 
           # 1. Envoyer le script sur le mainframe (via z/OSMF)
           zowe zos-files upload file-to-uss .github/scripts/mainframe_operations.sh "$USERDIR/mainframe_operations.sh"
 
-          # 2. L'exécuter sur le mainframe (via SSH)
-          zowe zos-uss issue ssh "sh mainframe_operations.sh" --cwd "$USERDIR" --port 22 --host-key "$SSH_HOST_KEY"
+          # 2. Installer sshpass (connexion SSH par mot de passe, sans terminal)
+          sudo apt-get install -y -qq sshpass
+
+          # 3. Faire confiance a la cle verifiee du serveur
+          mkdir -p ~/.ssh
+          echo "$ZOWE_OPT_HOST $SSH_HOST_KEY" >> ~/.ssh/known_hosts
+
+          # 4. Executer le script sur le mainframe (via SSH)
+          sshpass -e ssh -o StrictHostKeyChecking=yes \
+            -o PreferredAuthentications=password -o PubkeyAuthentication=no \
+            "$USERID@$ZOWE_OPT_HOST" "cd $USERDIR && sh mainframe_operations.sh"

@@ -12,8 +12,8 @@ java -version
 # Set ZOWE_USERNAME
 ZOWE_USERNAME="Z87663"
 
-# Change to the cobolcheck directory
-cd cobolcheck
+# Change to the cobolcheck directory (stop if it doesn't exist)
+cd cobolcheck || { echo "ERREUR : dossier cobolcheck introuvable"; exit 1; }
 echo "Changed to $(pwd)"
 ls -al
 
@@ -28,13 +28,16 @@ run_cobolcheck() {
   program=$1
   echo "Running cobolcheck for $program"
 
+  # Remove the file generated for the previous program
+  rm -f "CC##99.CBL"
+
   # Run cobolcheck, but don't exit if it fails
   java -jar bin/cobol-check-0.2.19.jar -p "$program"
   echo "Cobolcheck execution completed for $program (exceptions may have occurred)"
 
   # Check if CC##99.CBL was created, regardless of cobolcheck exit status
   if [ -f "CC##99.CBL" ]; then
-    if cp CC##99.CBL "//'${ZOWE_USERNAME}.CBL($program)'"; then
+    if cp "CC##99.CBL" "//'${ZOWE_USERNAME}.CBL($program)'"; then
       echo "Copied CC##99.CBL to ${ZOWE_USERNAME}.CBL($program)"
     else
       echo "Failed to copy CC##99.CBL to ${ZOWE_USERNAME}.CBL($program)"

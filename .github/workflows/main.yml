@@ -57,4 +57,4 @@ jobs:
           zowe zos-files upload file-to-uss .github/scripts/mainframe_operations.sh "$USERDIR/mainframe_operations.sh"
 
           # 2. L'exécuter sur le mainframe (via SSH)
-          zowe zos-uss issue ssh "sh mainframe_operations.sh" --cwd "$USERDIR" --port 22
+          zowe zos-uss issue ssh "sh mainframe_operations.sh" --cwd "$USERDIR" --port 22 --host-key "SHA256:1YtEA18or6MI0VQnVQn7ZUCtFVkJMRStN+DnqJZaxPk"

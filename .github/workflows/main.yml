@@ -41,3 +41,20 @@ jobs:
         run: |
           chmod +x .github/scripts/zowe_operations.sh
           .github/scripts/zowe_operations.sh
+
+      - name: Run COBOL Check on Mainframe
+        env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_OPT_USER: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_OPT_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_OPT_REJECT_UNAUTHORIZED: false
+        run: |
+          USERDIR="/z/$(echo "$ZOWE_USERNAME" | tr '[:upper:]' '[:lower:]')"
+
+          # 1. Envoyer le script sur le mainframe (via z/OSMF)
+          zowe zos-files upload file-to-uss .github/scripts/mainframe_operations.sh "$USERDIR/mainframe_operations.sh"
+
+          # 2. L'exécuter sur le mainframe (via SSH)
+          zowe zos-uss issue ssh "sh mainframe_operations.sh" --cwd "$USERDIR" --port 22

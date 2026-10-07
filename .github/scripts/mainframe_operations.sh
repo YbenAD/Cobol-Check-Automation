@@ -29,15 +29,15 @@ run_cobolcheck() {
   echo "Running cobolcheck for $program"
 
   # Remove the file generated for the previous program
-  rm -f "CC##99.CBL"
+  rm -f "testruns/CC##99.CBL"
 
   # Run cobolcheck, but don't exit if it fails
   java -jar bin/cobol-check-0.2.19.jar -p "$program"
   echo "Cobolcheck execution completed for $program (exceptions may have occurred)"
 
   # Check if CC##99.CBL was created, regardless of cobolcheck exit status
-  if [ -f "CC##99.CBL" ]; then
-    if cp "CC##99.CBL" "//'${ZOWE_USERNAME}.CBL($program)'"; then
+  if [ -f "testruns/CC##99.CBL" ]; then
+    if cp "testruns/CC##99.CBL" "//'${ZOWE_USERNAME}.CBL($program)'"; then
       echo "Copied CC##99.CBL to ${ZOWE_USERNAME}.CBL($program)"
     else
       echo "Failed to copy CC##99.CBL to ${ZOWE_USERNAME}.CBL($program)"

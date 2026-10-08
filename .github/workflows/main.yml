@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -79,19 +81,54 @@ jobs:
           ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_OPT_REJECT_UNAUTHORIZED: false
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
         run: |
           HLQ="$(echo "$ZOWE_USERNAME" | tr '[:lower:]' '[:upper:]')"
           FAILED=0
 
+          # 1. Fichiers modifies par ce push (tout si commit precedent introuvable)
+          if git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
+            CHANGED=$(git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA")
+          else
+            CHANGED=$(git ls-files)
+          fi
+
+          # 2. Programmes concernes : source, tests ou JCL modifies
+          PROGRAMS=""
           for program in EMPPAY DEPTPAY; do
+            if echo "$CHANGED" | grep -Eq "^cobol-check/(src/main/cobol/$program\.CBL|src/test/cobol/$program/|$program\.JCL)"; then
+              PROGRAMS="$PROGRAMS $program"
+            fi
+          done
+
+          if [ -z "$PROGRAMS" ]; then
+            echo "Aucun programme modifie : pas de job a soumettre."
+            exit 0
+          fi
+          echo "Programmes a tester :$PROGRAMS"
+
+          # 3. Soumission et lecture du seul SYSOUT de l'etape RUN
+          for program in $PROGRAMS; do
             echo "========== $program =========="
-            OUTPUT=$(zowe zos-jobs submit data-set "$HLQ.JCL($program)" --view-all-spool-content)
+            JOB=$(zowe zos-jobs submit data-set "$HLQ.JCL($program)" --wait-for-output --rfj)
+            JOBID=$(echo "$JOB" | jq -r '.data.jobid')
+            RETCODE=$(echo "$JOB" | jq -r '.data.retcode')
+            echo "Job $JOBID termine : $RETCODE"
+
+            SPOOLID=$(zowe zos-jobs list spool-files-by-jobid "$JOBID" --rfj \
+              | jq -r '.data[] | select(.stepname=="RUN" and .ddname=="SYSOUT") | .id')
+
+            if [ -z "$SPOOLID" ]; then
+              echo "::error::$program : etape RUN absente (erreur de compilation ?). Voir le job $JOBID dans Zowe Explorer."
+              FAILED=1
+              continue
+            fi
+
+            OUTPUT=$(zowe zos-jobs view spool-file-by-id "$JOBID" "$SPOOLID")
             echo "$OUTPUT"
 
-            if ! echo "$OUTPUT" | grep -q "TEST CASES WERE EXECUTED"; then
-              echo "::error::$program : tests non executes (erreur de compilation ou de JCL ?)"
-              FAILED=1
-            elif echo "$OUTPUT" | grep -Eq '^ *[1-9][0-9]* FAILED'; then
+            if echo "$OUTPUT" | grep -Eq '^ *[1-9][0-9]* FAILED'; then
               echo "::error::$program : des tests ont echoue"
               FAILED=1
             else

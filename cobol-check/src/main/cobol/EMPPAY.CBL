@@ -27,10 +27,10 @@
            MOVE 19                   TO EMP-HOURS.
            MOVE 23.50                TO EMP-HOURLY-RATE.
        PAYMENT-WEEKLY.
-           IF  EMP-HOURS >= 40
-               MOVE .25 TO  EMP-OT-RATE
-           ELSE IF EMP-HOURS >= 50
-               MOVE .50 TO EMP-OT-RATE
+           IF  EMP-HOURS >= 50
+               MOVE .5 TO  EMP-OT-RATE
+           ELSE IF EMP-HOURS >= 40
+               MOVE .25 TO EMP-OT-RATE
            ELSE
                MOVE ZERO TO EMP-OT-RATE.
            COMPUTE EMP-PAY-WEEK =

@@ -70,3 +70,33 @@ jobs:
           sshpass -e ssh -o StrictHostKeyChecking=yes \
             -o PreferredAuthentications=password -o PubkeyAuthentication=no \
             "$USERID@$ZOWE_OPT_HOST" "cd $USERDIR && sh mainframe_operations.sh"
+
+      - name: Submit test jobs
+        env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_OPT_USER: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_OPT_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_OPT_REJECT_UNAUTHORIZED: false
+        run: |
+          HLQ="$(echo "$ZOWE_USERNAME" | tr '[:lower:]' '[:upper:]')"
+          FAILED=0
+
+          for program in EMPPAY DEPTPAY; do
+            echo "========== $program =========="
+            OUTPUT=$(zowe zos-jobs submit data-set "$HLQ.JCL($program)" --view-all-spool-content)
+            echo "$OUTPUT"
+
+            if ! echo "$OUTPUT" | grep -q "TEST CASES WERE EXECUTED"; then
+              echo "::error::$program : tests non executes (erreur de compilation ou de JCL ?)"
+              FAILED=1
+            elif echo "$OUTPUT" | grep -Eq '^ *[1-9][0-9]* FAILED'; then
+              echo "::error::$program : des tests ont echoue"
+              FAILED=1
+            else
+              echo "$program : tous les tests sont passes"
+            fi
+          done
+
+          exit $FAILED

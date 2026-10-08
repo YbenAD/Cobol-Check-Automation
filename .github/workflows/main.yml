@@ -3,6 +3,7 @@ name: COBOL Check Automation
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   cobol-check:

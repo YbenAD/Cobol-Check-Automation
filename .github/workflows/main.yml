@@ -96,7 +96,7 @@ jobs:
 
           # 2. Programmes concernes : source, tests ou JCL modifies
           PROGRAMS=""
-          for program in EMPPAY DEPTPAY; do
+          for program in EMPPAY DEPTPAY PAYTEST; do
             if echo "$CHANGED" | grep -Eq "^cobol-check/(src/main/cobol/$program\.CBL|src/test/cobol/$program/|jcl/$program\.JCL)"; then
               PROGRAMS="$PROGRAMS $program"
             fi

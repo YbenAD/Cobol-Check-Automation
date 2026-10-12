@@ -19,7 +19,7 @@
            GOBACK.
 
        INITIALIZATION.
-           MOVE "AlEX DELORS" TO WHO.
+           MOVE "ALEX DELORS" TO WHO.
            MOVE "Viarolo, Parma" TO WHERE.
            MOVE "Learn to be a COBOL expert" TO WHY.
            MOVE 45 TO HOURS.
@@ -29,10 +29,10 @@
        COMPUTE-GROSS-PAY.
            IF HOURS > 40
              COMPUTE SUPPL = HOURS - 40
-             COMPUTE GROSS-PAY = RATE * (HOURS + SUPPL * (1 + T-SUP))
+             COMPUTE GROSS-PAY = RATE * (40 + SUPPL * (1 + T-SUP))
            ELSE
              COMPUTE GROSS-PAY = HOURS * RATE
-           ENDIF.
+           END-IF.
 
        SHOW-OUTPUT.
            DISPLAY "Name: " WHO.

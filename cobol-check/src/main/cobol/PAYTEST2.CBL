@@ -24,7 +24,7 @@
            MOVE "Learn to be a COBOL expert" TO WHY.
            MOVE 45 TO HOURS.
            MOVE 25 TO RATE.
-           MOVE .30 TO T-SUP.
+           MOVE 0.30 TO T-SUP.
 
        COMPUTE-GROSS-PAY.
            IF HOURS > 40

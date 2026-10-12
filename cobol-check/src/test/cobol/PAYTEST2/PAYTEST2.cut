@@ -4,7 +4,7 @@
                PERFORM INITIALIZATION
                EXPECT WHO TO BE "ALEX DELORS"
 
-           TestCase "INITIALIZATION fixe 19 heures et un taux de 23"
+           TestCase "INITIALIZATION fixe 40 heures et un taux de 25"
                PERFORM INITIALIZATION
                EXPECT HOURS TO BE 40
                EXPECT RATE TO BE 25
@@ -17,7 +17,7 @@
 
            TestCase "0 heure donne 0"
                MOVE 0 TO HOURS
-               MOVE 23 TO RATE
+               MOVE 25 TO RATE
                PERFORM COMPUTE-GROSS-PAY
                EXPECT GROSS-PAY TO BE 0
 

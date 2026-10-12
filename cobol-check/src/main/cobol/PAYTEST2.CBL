@@ -7,7 +7,7 @@
        77  WHY        PIC X(30).
        77  RATE       PIC 9(3).
        77  HOURS      PIC 9(3).
-       77  GROSS-PAY  PIC 9(5).
+       77  GROSS-PAY  PIC 9(5)V99.
        77  SUPPL      PIC 9(3).
        77  T-SUP      PIC 9V99.
 
@@ -19,7 +19,7 @@
            GOBACK.
 
        INITIALIZATION.
-           MOVE "Alex Delors" TO WHO.
+           MOVE "AlEX DELORS" TO WHO.
            MOVE "Viarolo, Parma" TO WHERE.
            MOVE "Learn to be a COBOL expert" TO WHY.
            MOVE 45 TO HOURS.

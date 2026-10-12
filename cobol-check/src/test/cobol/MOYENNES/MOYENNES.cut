@@ -1,0 +1,51 @@
+           TestSuite "Moyennes des eleves"
+
+           TestCase "PARSE-LINE decoupe le nom et le prenom"
+               MOVE "DUPONT,MARIE,14.5,12,15.5,11,16" TO WS-LINE
+               PERFORM PARSE-LINE
+               EXPECT WS-NOM TO BE "DUPONT"
+               EXPECT WS-PRENOM TO BE "MARIE"
+
+           TestCase "PARSE-LINE convertit les notes en nombres"
+               MOVE "DUPONT,MARIE,14.5,12,15.5,11,16" TO WS-LINE
+               PERFORM PARSE-LINE
+               EXPECT WS-NOTE (1) TO BE 14.5
+               EXPECT WS-NOTE (3) TO BE 15.5
+               EXPECT WS-NOTE (5) TO BE 16
+
+           TestCase "Moyenne eleve : 69 / 5 donne 13.80"
+               MOVE 14.5 TO WS-NOTE (1)
+               MOVE 12 TO WS-NOTE (2)
+               MOVE 15.5 TO WS-NOTE (3)
+               MOVE 11 TO WS-NOTE (4)
+               MOVE 16 TO WS-NOTE (5)
+               PERFORM COMPUTE-STUDENT-AVG
+               EXPECT WS-MOY-ELEVE TO BE 13.80
+
+           TestCase "Moyenne eleve : que des 20 donne 20"
+               MOVE 20 TO WS-NOTE (1)
+               MOVE 20 TO WS-NOTE (2)
+               MOVE 20 TO WS-NOTE (3)
+               MOVE 20 TO WS-NOTE (4)
+               MOVE 20 TO WS-NOTE (5)
+               PERFORM COMPUTE-STUDENT-AVG
+               EXPECT WS-MOY-ELEVE TO BE 20
+
+           TestCase "Moyenne par matiere sur 2 eleves"
+               PERFORM INIT-TOTALS
+               MOVE "A,B,10,12,14,16,18" TO WS-LINE
+               PERFORM PARSE-LINE
+               PERFORM ACCUMULATE-TOTALS
+               MOVE "C,D,14,8,10,12,20" TO WS-LINE
+               PERFORM PARSE-LINE
+               PERFORM ACCUMULATE-TOTALS
+               PERFORM COMPUTE-SUBJECT-AVG
+               EXPECT WS-NB-ELEVES TO BE 2
+               EXPECT WS-MOY-MAT (1) TO BE 12
+               EXPECT WS-MOY-MAT (2) TO BE 10
+               EXPECT WS-MOY-MAT (5) TO BE 19
+
+           TestCase "Aucun eleve : pas de division par zero"
+               PERFORM INIT-TOTALS
+               PERFORM COMPUTE-SUBJECT-AVG
+               EXPECT WS-MOY-MAT (1) TO BE 0

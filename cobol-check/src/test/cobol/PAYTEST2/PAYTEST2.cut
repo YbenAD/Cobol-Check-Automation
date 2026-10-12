@@ -1,0 +1,28 @@
+           TestSuite "Calcul de la paie PAYTEST"
+
+           TestCase "INITIALIZATION remplit le nom"
+               PERFORM INITIALIZATION
+               EXPECT WHO TO BE "ALEX DELORS"
+
+           TestCase "INITIALIZATION fixe 19 heures et un taux de 23"
+               PERFORM INITIALIZATION
+               EXPECT HOURS TO BE 40
+               EXPECT RATE TO BE 25
+
+           TestCase "40 heures x 25 donne 1000 "
+               MOVE 40 TO HOURS
+               MOVE 25 TO RATE
+               PERFORM COMPUTE-GROSS-PAY
+               EXPECT GROSS-PAY TO BE 1000
+
+           TestCase "0 heure donne 0"
+               MOVE 0 TO HOURS
+               MOVE 23 TO RATE
+               PERFORM COMPUTE-GROSS-PAY
+               EXPECT GROSS-PAY TO BE 0
+
+           TestCase "45 heures x 25 donne 1000"
+               MOVE 45 TO HOURS
+               MOVE 25 TO RATE
+               PERFORM COMPUTE-GROSS-PAY
+               EXPECT GROSS-PAY TO BE 1162.5

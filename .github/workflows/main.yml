@@ -141,12 +141,19 @@ jobs:
 
       - name: Run MOYENNES on real data
         env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_OPT_USER: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_OPT_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
           ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_OPT_REJECT_UNAUTHORIZED: false
         run: |
+          HLQ="$(echo "$ZOWE_USERNAME" | tr '[:lower:]' '[:upper:]')"
+
+          # 1. Copier la source normale dans le membre MOYRUN
+          zowe zos-files upload file-to-data-set cobol-check/src/main/cobol/MOYENNES.CBL "$HLQ.CBL(MOYRUN)"
+
+          # 2. Compiler et executer sur les vraies donnees
           JOB=$(zowe zos-jobs submit local-file cobol-check/jcl/MOYRUN.JCL --wait-for-output --rfj)
           JOBID=$(echo "$JOB" | jq -r '.data.jobid')
           RETCODE=$(echo "$JOB" | jq -r '.data.retcode')

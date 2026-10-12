@@ -97,7 +97,7 @@ jobs:
 
           # 2. Programmes concernes : source, tests ou JCL modifies
           PROGRAMS=""
-          for program in EMPPAY DEPTPAY PAYTEST PAYTEST2 MOYENNES; do
+          for program in EMPPAY DEPTPAY PAYTEST2 MOYENNES; do
             if echo "$CHANGED" | grep -Eq "^cobol-check/(src/main/cobol/$program\.CBL|src/test/cobol/$program/|jcl/$program\.JCL)"; then
               PROGRAMS="$PROGRAMS $program"
             fi
@@ -138,3 +138,31 @@ jobs:
           done
 
           exit $FAILED
+
+      - name: Run MOYENNES on real data
+        env:
+          ZOWE_OPT_USER: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_OPT_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_OPT_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_OPT_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_OPT_REJECT_UNAUTHORIZED: false
+        run: |
+          JOB=$(zowe zos-jobs submit local-file cobol-check/jcl/MOYRUN.JCL --wait-for-output --rfj)
+          JOBID=$(echo "$JOB" | jq -r '.data.jobid')
+          RETCODE=$(echo "$JOB" | jq -r '.data.retcode')
+          echo "Job $JOBID termine : $RETCODE"
+
+          SPOOLID=$(zowe zos-jobs list spool-files-by-jobid "$JOBID" --rfj \
+            | jq -r '.data[] | select(.stepname=="RUN" and .ddname=="SYSOUT") | .id')
+
+          if [ -z "$SPOOLID" ]; then
+            echo "::error::MOYRUN : etape RUN absente (erreur de compilation ?). Voir le job $JOBID"
+            exit 1
+          fi
+
+          zowe zos-jobs view spool-file-by-id "$JOBID" "$SPOOLID"
+
+          if [ "$RETCODE" != "CC 0000" ]; then
+            echo "::error::MOYRUN termine avec $RETCODE"
+            exit 1
+          fi

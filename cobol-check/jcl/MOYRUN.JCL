@@ -3,8 +3,7 @@
 //* Execution reelle de MOYENNES sur Z87663.NOTES.CSV
 //***************************************************
 //COBRUN  EXEC IGYWCL
-//COBOL.SYSIN  DD PATHOPTS=ORDONLY,FILEDATA=TEXT,
-//  PATH='/z/z87663/cobolcheck/src/main/cobol/MOYENNES.CBL'
+//COBOL.SYSIN  DD DSN=&SYSUID..CBL(MOYRUN),DISP=SHR
 //LKED.SYSLMOD DD DSN=&SYSUID..LOAD(MOYRUN),DISP=SHR
 //***************************************************
 // IF RC LE 4 THEN

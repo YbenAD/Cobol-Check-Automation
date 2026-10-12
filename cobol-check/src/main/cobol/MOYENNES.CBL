@@ -33,7 +33,7 @@
            05  FILLER               PIC X(10) VALUE 'MATHS'.
            05  FILLER               PIC X(10) VALUE 'PHYSIQUE'.
            05  FILLER               PIC X(10) VALUE 'CHIMIE'.
-           05  FILLER               PIC X(10) VALUE 'DROIT'.
+           05  FILLER               PIC X(10) VALUE 'DROIt'.
            05  FILLER               PIC X(10) VALUE 'BIOLOGIE'.
        01  WS-MAT-TABLE REDEFINES WS-MATIERES.
            05  WS-MAT-NOM           PIC X(10) OCCURS 5.
